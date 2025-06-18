@@ -9,7 +9,7 @@ import { JobCard } from './components/JobCard'
 import { Toaster } from './components/ui/toaster'
 import { useToast } from './hooks/use-toast'
 
-export type JobStatus = 'pending' | 'in-progress' | 'ready' | 'completed'
+export type JobStatus = 'pending' | 'in-progress' | 'touch-ups-1' | 'touch-ups-2' | 'ready' | 'completed'
 
 export interface Job {
   id: string
@@ -19,6 +19,8 @@ export interface Job {
   createdAt: Date
   updatedAt: Date
   notes?: string
+  builderName?: string
+  builderContact?: string
 }
 
 function App() {
@@ -34,6 +36,8 @@ function App() {
         ...job,
         createdAt: new Date(job.createdAt),
         updatedAt: new Date(job.updatedAt),
+        builderName: job.builderName || undefined,
+        builderContact: job.builderContact || undefined,
       }))
       setJobs(parsedJobs)
     }
@@ -50,6 +54,8 @@ function App() {
       id: crypto.randomUUID(),
       createdAt: new Date(),
       updatedAt: new Date(),
+      builderName: jobData.builderName || undefined,
+      builderContact: jobData.builderContact || undefined,
     }
     setJobs(prev => [newJob, ...prev])
     setIsFormOpen(false)
@@ -96,6 +102,8 @@ function App() {
       total: jobs.length,
       pending: jobs.filter(j => j.status === 'pending').length,
       inProgress: jobs.filter(j => j.status === 'in-progress').length,
+      touchUps1: jobs.filter(j => j.status === 'touch-ups-1').length,
+      touchUps2: jobs.filter(j => j.status === 'touch-ups-2').length,
       ready: jobs.filter(j => j.status === 'ready').length,
       completed: jobs.filter(j => j.status === 'completed').length,
     }
@@ -137,7 +145,7 @@ function App() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8"
+          className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8"
         >
           <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
             <CardContent className="p-4">
@@ -176,6 +184,34 @@ function App() {
                 <div>
                   <p className="text-sm text-slate-600">In Progress</p>
                   <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <CheckCircle className="w-4 h-4 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Touch Ups 1</p>
+                  <p className="text-2xl font-bold text-yellow-600">{stats.touchUps1}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/70 backdrop-blur-sm border-slate-200/50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-yellow-200 rounded-lg">
+                  <CheckCircle className="w-4 h-4 text-yellow-800" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Touch Ups 2</p>
+                  <p className="text-2xl font-bold text-yellow-800">{stats.touchUps2}</p>
                 </div>
               </div>
             </CardContent>

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { MapPin, Hash, Calendar, MoreVertical, Trash2, CheckCircle, Clock, AlertTriangle } from 'lucide-react'
+import { MapPin, Hash, Calendar, MoreVertical, Trash2, CheckCircle, Clock, AlertTriangle, User, Phone } from 'lucide-react'
 import { Card, CardContent } from './ui/card'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
@@ -25,6 +25,18 @@ const statusConfig = {
     icon: AlertTriangle,
     color: 'bg-blue-100 text-blue-700 border-blue-200',
     dotColor: 'bg-blue-500'
+  },
+  'touch-ups-1': {
+    label: 'Touch Ups Round 1',
+    icon: CheckCircle,
+    color: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    dotColor: 'bg-yellow-500'
+  },
+  'touch-ups-2': {
+    label: 'Touch Ups Round 2',
+    icon: CheckCircle,
+    color: 'bg-yellow-200 text-yellow-800 border-yellow-300',
+    dotColor: 'bg-yellow-800'
   },
   ready: {
     label: 'Ready',
@@ -101,6 +113,24 @@ export function JobCard({ job, onStatusChange, onDelete }: JobCardProps) {
             <p className="text-slate-700 text-sm leading-relaxed">{job.address}</p>
           </div>
 
+          {/* Builder Info */}
+          {(job.builderName || job.builderContact) && (
+            <div className="mb-4 p-3 bg-slate-50 rounded-lg space-y-2">
+              {job.builderName && (
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                  <p className="text-sm text-slate-700 font-medium">{job.builderName}</p>
+                </div>
+              )}
+              {job.builderContact && (
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                  <p className="text-sm text-slate-600">{job.builderContact}</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Notes */}
           {job.notes && (
             <div className="mb-4 p-3 bg-slate-50 rounded-lg">
@@ -128,6 +158,18 @@ export function JobCard({ job, onStatusChange, onDelete }: JobCardProps) {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-blue-500" />
                     In Progress
+                  </div>
+                </SelectItem>
+                <SelectItem value="touch-ups-1">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                    Touch Ups Round 1
+                  </div>
+                </SelectItem>
+                <SelectItem value="touch-ups-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-yellow-800" />
+                    Touch Ups Round 2
                   </div>
                 </SelectItem>
                 <SelectItem value="ready">

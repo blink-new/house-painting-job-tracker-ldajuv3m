@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { Home, Hash, MapPin, FileText } from 'lucide-react'
+import { Home, Hash, MapPin, FileText, User, Phone } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -21,6 +21,8 @@ export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
     address: '',
     status: 'pending' as JobStatus,
     notes: '',
+    builderName: '',
+    builderContact: '',
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -35,6 +37,8 @@ export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
       address: formData.address.trim(),
       status: formData.status,
       notes: formData.notes.trim() || undefined,
+      builderName: formData.builderName.trim() || undefined,
+      builderContact: formData.builderContact.trim() || undefined,
     })
 
     // Reset form
@@ -43,6 +47,8 @@ export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
       address: '',
       status: 'pending',
       notes: '',
+      builderName: '',
+      builderContact: '',
     })
   }
 
@@ -54,6 +60,8 @@ export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
       address: '',
       status: 'pending',
       notes: '',
+      builderName: '',
+      builderContact: '',
     })
   }
 
@@ -103,6 +111,36 @@ export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
               />
             </div>
 
+            {/* Builder Name */}
+            <div className="space-y-2">
+              <Label htmlFor="builderName" className="flex items-center gap-2 text-slate-700 font-medium">
+                <User className="w-4 h-4" />
+                Builder Name (Optional)
+              </Label>
+              <Input
+                id="builderName"
+                value={formData.builderName}
+                onChange={(e) => setFormData(prev => ({ ...prev, builderName: e.target.value }))}
+                placeholder="e.g., John Doe Construction"
+                className="border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+              />
+            </div>
+
+            {/* Builder Contact */}
+            <div className="space-y-2">
+              <Label htmlFor="builderContact" className="flex items-center gap-2 text-slate-700 font-medium">
+                <Phone className="w-4 h-4" />
+                Builder Contact (Optional)
+              </Label>
+              <Input
+                id="builderContact"
+                value={formData.builderContact}
+                onChange={(e) => setFormData(prev => ({ ...prev, builderContact: e.target.value }))}
+                placeholder="e.g., (555) 123-4567 or email@example.com"
+                className="border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+              />
+            </div>
+
             {/* Status */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-slate-700 font-medium">
@@ -119,6 +157,8 @@ export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
                 <SelectContent>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="touch-ups-1">Touch Ups Round 1</SelectItem>
+                  <SelectItem value="touch-ups-2">Touch Ups Round 2</SelectItem>
                   <SelectItem value="ready">Ready</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
