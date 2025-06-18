@@ -1,16 +1,17 @@
 import { motion } from 'framer-motion'
-import { MapPin, Hash, Calendar, MoreVertical, Trash2, CheckCircle, Clock, AlertTriangle, User, Phone } from 'lucide-react'
+import { MapPin, Hash, Calendar, MoreVertical, Trash2, CheckCircle, Clock, AlertTriangle, Phone, Briefcase } from 'lucide-react'
 import { Card, CardContent } from './ui/card'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import type { Job, JobStatus } from '../App'
+import type { Job, JobStatus, Builder } from '../App'
 
 interface JobCardProps {
   job: Job
   onStatusChange: (jobId: string, status: JobStatus) => void
   onDelete: (jobId: string) => void
+  builders: Builder[]
 }
 
 const statusConfig = {
@@ -52,9 +53,10 @@ const statusConfig = {
   }
 }
 
-export function JobCard({ job, onStatusChange, onDelete }: JobCardProps) {
+export function JobCard({ job, onStatusChange, onDelete, builders }: JobCardProps) {
   const config = statusConfig[job.status]
   const StatusIcon = config.icon
+  const builder = job.builderId ? builders.find(b => b.id === job.builderId) : undefined
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -114,18 +116,16 @@ export function JobCard({ job, onStatusChange, onDelete }: JobCardProps) {
           </div>
 
           {/* Builder Info */}
-          {(job.builderName || job.builderContact) && (
+          {builder && (
             <div className="mb-4 p-3 bg-slate-50 rounded-lg space-y-2">
-              {job.builderName && (
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-slate-500 flex-shrink-0" />
-                  <p className="text-sm text-slate-700 font-medium">{job.builderName}</p>
-                </div>
-              )}
-              {job.builderContact && (
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                <p className="text-sm text-slate-700 font-medium">{builder.name}</p>
+              </div>
+              {builder.contact && (
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-slate-500 flex-shrink-0" />
-                  <p className="text-sm text-slate-600">{job.builderContact}</p>
+                  <p className="text-sm text-slate-600">{builder.contact}</p>
                 </div>
               )}
             </div>

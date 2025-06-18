@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Home, CheckCircle, Clock, AlertTriangle } from 'lucide-react'
+import { Plus, Home, CheckCircle, Clock, AlertTriangle, UserPlus } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Card, CardContent } from './components/ui/card'
 
@@ -8,8 +8,15 @@ import { JobForm } from './components/JobForm'
 import { JobCard } from './components/JobCard'
 import { Toaster } from './components/ui/toaster'
 import { useToast } from './hooks/use-toast'
+import { BuilderForm } from './components/BuilderForm'
 
 export type JobStatus = 'pending' | 'in-progress' | 'touch-ups-1' | 'touch-ups-2' | 'ready' | 'completed'
+
+export interface Builder {
+  id: string
+  name: string
+  contact: string
+}
 
 export interface Job {
   id: string
@@ -19,13 +26,14 @@ export interface Job {
   createdAt: Date
   updatedAt: Date
   notes?: string
-  builderName?: string
-  builderContact?: string
+  builderId?: string
 }
 
 function App() {
   const [jobs, setJobs] = useState<Job[]>([])
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [builders, setBuilders] = useState<Builder[]>([])
+  const [isJobFormOpen, setIsJobFormOpen] = useState(false)
+  const [isBuilderFormOpen, setIsBuilderFormOpen] = useState(false)
   const { toast } = useToast()
 
   // Load jobs from localStorage on mount
@@ -33,13 +41,24 @@ function App() {
     const savedJobs = localStorage.getItem('painting-jobs')
     if (savedJobs) {
       const parsedJobs = JSON.parse(savedJobs).map((job: Job & { createdAt: string; updatedAt: string }) => ({
-        ...job,
+        id: job.id,
+        jobNumber: job.jobNumber,
+        address: job.address,
+        status: job.status,
         createdAt: new Date(job.createdAt),
         updatedAt: new Date(job.updatedAt),
-        builderName: job.builderName || undefined,
-        builderContact: job.builderContact || undefined,
+        notes: job.notes,
+        builderId: job.builderId,
       }))
       setJobs(parsedJobs)
+    }
+  }, [])
+
+  // Load builders from localStorage on mount
+  useEffect(() => {
+    const savedBuilders = localStorage.getItem('painting-builders')
+    if (savedBuilders) {
+      setBuilders(JSON.parse(savedBuilders))
     }
   }, [])
 
@@ -48,17 +67,20 @@ function App() {
     localStorage.setItem('painting-jobs', JSON.stringify(jobs))
   }, [jobs])
 
+  // Save builders to localStorage whenever builders change
+  useEffect(() => {
+    localStorage.setItem('painting-builders', JSON.stringify(builders))
+  }, [builders])
+
   const addJob = (jobData: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newJob: Job = {
       ...jobData,
       id: crypto.randomUUID(),
       createdAt: new Date(),
       updatedAt: new Date(),
-      builderName: jobData.builderName || undefined,
-      builderContact: jobData.builderContact || undefined,
     }
     setJobs(prev => [newJob, ...prev])
-    setIsFormOpen(false)
+    setIsJobFormOpen(false)
     toast({
       title: "Job Added",
       description: `Job #${jobData.jobNumber} has been created successfully.`,
@@ -69,7 +91,7 @@ function App() {
     setJobs(prev => prev.map(job => {
       if (job.id === jobId) {
         const updatedJob = { ...job, status: newStatus, updatedAt: new Date() }
-        
+
         // Send notification if job is ready
         if (newStatus === 'ready') {
           toast({
@@ -78,7 +100,7 @@ function App() {
             variant: "default",
           })
         }
-        
+
         return updatedJob
       }
       return job
@@ -95,6 +117,19 @@ function App() {
         variant: "destructive",
       })
     }
+  }
+
+  const addBuilder = (builderData: Omit<Builder, 'id'>) => {
+    const newBuilder: Builder = {
+      ...builderData,
+      id: crypto.randomUUID(),
+    }
+    setBuilders(prev => [newBuilder, ...prev])
+    setIsBuilderFormOpen(false)
+    toast({
+      title: "Builder Added",
+      description: `${builderData.name} has been added to your builders list.`,
+    })
   }
 
   const getStatusStats = () => {
@@ -115,7 +150,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
@@ -130,18 +165,26 @@ function App() {
                 <p className="text-slate-600">Track your house painting projects</p>
               </div>
             </div>
-            <Button 
-              onClick={() => setIsFormOpen(true)}
+            <Button
+              onClick={() => setIsJobFormOpen(true)}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
             >
               <Plus className="w-4 h-4 mr-2" />
               New Job
             </Button>
+            <Button
+              onClick={() => setIsBuilderFormOpen(true)}
+              variant="outline"
+              className="ml-4 shadow-lg"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Add Builder
+            </Button>
           </div>
         </motion.div>
 
         {/* Stats Cards */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -247,7 +290,7 @@ function App() {
         </motion.div>
 
         {/* Jobs Grid */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -260,8 +303,8 @@ function App() {
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">No jobs yet</h3>
                 <p className="text-slate-600 mb-6">Create your first painting job to get started</p>
-                <Button 
-                  onClick={() => setIsFormOpen(true)}
+                <Button
+                  onClick={() => setIsJobFormOpen(true)}
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -278,8 +321,9 @@ function App() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <JobCard 
+                  <JobCard
                     job={job}
+                    builders={builders}
                     onStatusChange={updateJobStatus}
                     onDelete={deleteJob}
                   />
@@ -290,10 +334,18 @@ function App() {
         </motion.div>
 
         {/* Job Form Modal */}
-        <JobForm 
-          open={isFormOpen}
-          onOpenChange={setIsFormOpen}
+        <JobForm
+          open={isJobFormOpen}
+          onOpenChange={setIsJobFormOpen}
           onSubmit={addJob}
+          builders={builders}
+        />
+
+        {/* Builder Form Modal */}
+        <BuilderForm
+          open={isBuilderFormOpen}
+          onOpenChange={setIsBuilderFormOpen}
+          onSubmit={addBuilder}
         />
       </div>
       <Toaster />

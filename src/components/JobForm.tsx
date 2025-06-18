@@ -1,28 +1,27 @@
 import { useState } from 'react'
-
-import { Home, Hash, MapPin, FileText, User, Phone } from 'lucide-react'
+import { Home, Hash, MapPin, FileText, Briefcase } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Textarea } from './ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
-import type { Job, JobStatus } from '../App'
+import type { Job, JobStatus, Builder } from '../App'
 
 interface JobFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt'>) => void
+  builders: Builder[]
 }
 
-export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
+export function JobForm({ open, onOpenChange, onSubmit, builders }: JobFormProps) {
   const [formData, setFormData] = useState({
     jobNumber: '',
     address: '',
     status: 'pending' as JobStatus,
     notes: '',
-    builderName: '',
-    builderContact: '',
+    builderId: ''
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -37,8 +36,7 @@ export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
       address: formData.address.trim(),
       status: formData.status,
       notes: formData.notes.trim() || undefined,
-      builderName: formData.builderName.trim() || undefined,
-      builderContact: formData.builderContact.trim() || undefined,
+      builderId: formData.builderId || undefined,
     })
 
     // Reset form
@@ -47,8 +45,7 @@ export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
       address: '',
       status: 'pending',
       notes: '',
-      builderName: '',
-      builderContact: '',
+      builderId: ''
     })
   }
 
@@ -60,8 +57,7 @@ export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
       address: '',
       status: 'pending',
       notes: '',
-      builderName: '',
-      builderContact: '',
+      builderId: ''
     })
   }
 
@@ -111,34 +107,28 @@ export function JobForm({ open, onOpenChange, onSubmit }: JobFormProps) {
               />
             </div>
 
-            {/* Builder Name */}
+            {/* Builder Select */}
             <div className="space-y-2">
-              <Label htmlFor="builderName" className="flex items-center gap-2 text-slate-700 font-medium">
-                <User className="w-4 h-4" />
-                Builder Name (Optional)
+              <Label htmlFor="builderId" className="flex items-center gap-2 text-slate-700 font-medium">
+                <Briefcase className="w-4 h-4" />
+                Builder (Optional)
               </Label>
-              <Input
-                id="builderName"
-                value={formData.builderName}
-                onChange={(e) => setFormData(prev => ({ ...prev, builderName: e.target.value }))}
-                placeholder="e.g., John Doe Construction"
-                className="border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
-              />
-            </div>
-
-            {/* Builder Contact */}
-            <div className="space-y-2">
-              <Label htmlFor="builderContact" className="flex items-center gap-2 text-slate-700 font-medium">
-                <Phone className="w-4 h-4" />
-                Builder Contact (Optional)
-              </Label>
-              <Input
-                id="builderContact"
-                value={formData.builderContact}
-                onChange={(e) => setFormData(prev => ({ ...prev, builderContact: e.target.value }))}
-                placeholder="e.g., (555) 123-4567 or email@example.com"
-                className="border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
-              />
+              <Select
+                value={formData.builderId}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, builderId: value }))}
+              >
+                <SelectTrigger className="border-slate-200 focus:border-blue-500 focus:ring-blue-500/20">
+                  <SelectValue placeholder="Select a builder" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem> 
+                  {builders.map(builder => (
+                    <SelectItem key={builder.id} value={builder.id}>
+                      {builder.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Status */}
